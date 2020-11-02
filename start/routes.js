@@ -22,6 +22,7 @@ Route.get('/', () => {
 
 Route.post('/users', 'UserController.create')
 Route.get('/users', 'UserController.read').middleware('auth')
+Route.put('/users', 'UserController.update').middleware('auth')
 
 Route.post('/sessions', 'SessionController.create')
 
