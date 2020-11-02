@@ -3,7 +3,7 @@
 const User = use('App/Models/User')
 
 class UserController {
-  async create ({ request }) {
+  async create({ request }) {
     const data = request.only(['firstname', 'lastname', 'email', 'password'])
 
     const user = await User.create(data)
@@ -11,7 +11,7 @@ class UserController {
     return user
   }
 
-  async read ({ auth, params, response }) {
+  async read({ auth, response }) {
     try {
       await auth.check()
       return await auth.getUser()
