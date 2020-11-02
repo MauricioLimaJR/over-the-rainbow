@@ -10,6 +10,15 @@ class UserController {
 
     return user
   }
+
+  async read ({ auth, params, response }) {
+    try {
+      await auth.check()
+      return await auth.getUser()
+    } catch (error) {
+      return response.send('You are not logged in')
+    }
+  }
 }
 
 module.exports = UserController
