@@ -24,18 +24,12 @@ class UserController {
    * Update user attributes
    * @param {Object} request - ?firstname, ?lastname, ?email, ?password
    */
-  async update({ request }) {
+  async update({ request, response }) {
     const data = request.only(['firstname', 'lastname', 'email', 'password'])
     const { id } = request.all()
 
     try {
       const user = await User.find(id)
-
-      // if (data.email) {
-      //   const emailInUse = await User.findBy('email', data.email)
-      //   if (emailInUse && emailInUse.id !== id)
-      //     throw new Error('email is already used')
-      // }
 
       // Verify each valid user property and update it
       Object.keys(data).forEach(prop => {
@@ -47,7 +41,9 @@ class UserController {
       await user.save()
       return true
     } catch (err) {
-      return err
+      if (err.code === '23505')
+        return response.status(500).send({ message: 'email ja em uso' })
+      return response.status(500).send(err)
     }
   }
 }
