@@ -4,10 +4,35 @@
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
+const Rating = use('App/Models/Rating')
+
 /**
  * Resourceful controller for interacting with ratings
  */
 class RatingController {
+  /**
+   * List all ratings for some place.
+   * GET ratings/?place_id
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   */
+  async index ({ request, response }) {
+    try {
+      const { place_id } = request.all()
+
+      const ratings = Rating
+        .query()
+        .where('place_id', place_id)
+        .fetch()
+
+      return ratings
+    } catch (err) {
+      return response.status(500).send({ error: err.message })
+    }
+  }
+
   /**
    * Create/save a new rating.
    * POST ratings
@@ -16,42 +41,17 @@ class RatingController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async create ({ request, response }) {
-  }
+  async store ({ request, response, auth }) {
+    try {
+      const data = request.only(['place_id', 'score', 'description'])
+      const user_id = auth.user.id
 
-  /**
-   * Display a single rating.
-   * GET ratings/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async read ({ params, request, response }) {
-  }
+      const rating = await Rating.create({ ...data, user_id })
 
-  /**
-   * Show a list with all ratings from some place.
-   * GET ratings
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async listByPlace ({ request, response, view }) {
-  }
-
-  /**
-   * Update rating details.
-   * PUT or PATCH ratings/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async update ({ params, request, response }) {
+      return rating
+    } catch (err) {
+      return response.status(500).send({ error: err.message })
+    }
   }
 
   /**
@@ -62,7 +62,16 @@ class RatingController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async delete ({ params, request, response }) {
+  async destroy ({ params, response }) {
+    try {
+      const { id } = params
+
+      const rating = await Rating.find(id)
+
+      await rating.delete()
+    } catch (err) {
+      return response.status(500).send({ error: err.message })
+    }
   }
 }
 

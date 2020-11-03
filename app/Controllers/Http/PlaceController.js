@@ -116,7 +116,7 @@ class PlaceController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy ({ params, response }) {
     try {
       const { id } = params
 
