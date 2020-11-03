@@ -13,10 +13,9 @@ class UserController {
 
   async read({ auth, response }) {
     try {
-      await auth.check()
-      return await auth.getUser()
-    } catch (error) {
-      return response.send('You are not logged in')
+      return await User.find(auth.user.id)
+    } catch (err) {
+      return response.send({ error: err.message })
     }
   }
 

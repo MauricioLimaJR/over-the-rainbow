@@ -4,20 +4,46 @@
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
+const Place = use('App/Models/Place')
+
 /**
  * Resourceful controller for interacting with places
  */
 class PlaceController {
   /**
-   * Render a form to be used for creating a new place.
-   * GET places/create
+   * Create/save a new place.
+   * POST places
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async create ({ request, response }) {
+  async store ({ request, response, auth }) {
+    try {
+      const { title, address, latitude, longitude } = request.all()
+      const user_id = auth.user.id
+
+      const checkCoordinates = await Place
+        .query()
+        .where('latitude', latitude)
+        .where('longitude', longitude)
+        .fetch()
+
+      if (checkCoordinates.toJSON().length > 0)
+        throw new Error('Place is already saved')
+
+      const place = new Place()
+      place.user_id = user_id
+      place.title = title
+      place.address = address
+      place.latitude = latitude
+      place.longitude = longitude
+
+      return await place.save()
+    } catch (err) {
+      console.log(err.message)
+      return response.status(500).send({ error: err.message })
+    }
   }
 
   /**
@@ -29,7 +55,7 @@ class PlaceController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async read ({ params, request, response }) {
+  async show ({ params, request, response }) {
   }
 
   /**

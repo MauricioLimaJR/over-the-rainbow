@@ -28,3 +28,12 @@ Route.put('/users', 'UserController.update').middleware('auth')
 // Session routes
 Route.post('/sessions', 'SessionController.create')
 
+// Place routes
+Route.resource('places', 'PlaceController')
+  .apiOnly()
+  .middleware('auth')
+
+// Rating routes
+Route.resource('ratings', 'RatingController')
+  .apiOnly()
+  .middleware('auth')
