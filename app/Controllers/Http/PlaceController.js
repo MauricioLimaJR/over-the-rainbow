@@ -41,7 +41,7 @@ class PlaceController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async listByLocation ({ request, response }) {
+  async listByUserLocation ({ request, response }) {
   }
 
   /**
