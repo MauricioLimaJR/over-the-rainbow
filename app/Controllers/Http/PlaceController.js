@@ -94,12 +94,11 @@ class PlaceController {
    */
   async update ({ params, request, response }) {
     try {
-      const { title, description } = request.all()
+      const data = request.only(['title', 'address', 'description'])
       const { id } = params
 
       const place = await Place.find(id)
-      if ( title) place.title = title
-      if (description) place.description = description
+      place.merge(data)
       await place.save()
 
       return place
