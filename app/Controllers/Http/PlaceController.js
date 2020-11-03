@@ -11,6 +11,29 @@ const Place = use('App/Models/Place')
  */
 class PlaceController {
   /**
+   * List places near a location.
+   * GET places/?latitude&longitude&distance
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   */
+  async index ({ request, response }) {
+    try {
+      const { latitude, longitude, distance } = request.all()
+
+      const places = Place
+        .query()
+        .nearBy(latitude, longitude, distance)
+        .fetch()
+
+      return places
+    } catch (err) {
+      return response.status(500).send({ error: err.message })
+    }
+  }
+
+  /**
    * Create/save a new place.
    * POST places
    *
@@ -20,28 +43,22 @@ class PlaceController {
    */
   async store ({ request, response, auth }) {
     try {
-      const { title, address, latitude, longitude } = request.all()
+      const data = request.only(['title', 'address', 'latitude', 'longitude'])
       const user_id = auth.user.id
 
       const checkCoordinates = await Place
         .query()
-        .where('latitude', latitude)
-        .where('longitude', longitude)
+        .where('latitude', data.latitude)
+        .where('longitude', data.longitude)
         .fetch()
 
       if (checkCoordinates.toJSON().length > 0)
         throw new Error('Place is already saved')
 
-      const place = new Place()
-      place.user_id = user_id
-      place.title = title
-      place.address = address
-      place.latitude = latitude
-      place.longitude = longitude
+      const place = await Place.create({ ...data, user_id })
 
-      return await place.save()
+      return place
     } catch (err) {
-      console.log(err.message)
       return response.status(500).send({ error: err.message })
     }
   }
@@ -53,21 +70,18 @@ class PlaceController {
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async show ({ params, request, response }) {
-  }
+  async show ({ params, response }) {
+    try {
+      const { id } = params
 
-  /**
-   * Show a list of places nearby user current location
-   * GET places
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async listByUserLocation ({ request, response }) {
+      const place = await Place.find(id)
+      await place.load('ratings')
+
+      return place
+    } catch (err) {
+      return response.status(500).send({ error: err.message })
+    }
   }
 
   /**
@@ -79,6 +93,19 @@ class PlaceController {
    * @param {Response} ctx.response
    */
   async update ({ params, request, response }) {
+    try {
+      const { title, description } = request.all()
+      const { id } = params
+
+      const place = await Place.find(id)
+      if ( title) place.title = title
+      if (description) place.description = description
+      await place.save()
+
+      return place
+    } catch (err) {
+      return response.status(500).send({ error: err.message })
+    }
   }
 
   /**
@@ -89,7 +116,16 @@ class PlaceController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async delete ({ params, request, response }) {
+  async destroy ({ params, request, response }) {
+    try {
+      const { id } = params
+
+      const place = await Place.find(id)
+
+      await place.delete()
+    } catch (err) {
+      return response.status(500).send({ error: err.message })
+    }
   }
 }
 
