@@ -1,0 +1,24 @@
+version: '3'
+services:
+  database:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: 1234
+  otr-service:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    container_name: otr-service
+    # command: ["node", "ace", "migration:run"]
+    ports:
+      - 8080:8080
+    links:
+      - database
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - database

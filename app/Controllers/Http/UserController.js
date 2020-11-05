@@ -11,7 +11,7 @@ class UserController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store({ request }) {
+  async store({ request, response }) {
     try {
       const data = request.only(['firstname', 'lastname', 'email', 'password'])
 

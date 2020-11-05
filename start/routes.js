@@ -21,8 +21,8 @@ Route.get('/', () => {
 })
 
 // User routes
-Route.post('/users', 'UserController.create')
-Route.get('/users', 'UserController.read').middleware('auth')
+Route.post('/users', 'UserController.store')
+Route.get('/users', 'UserController.show').middleware('auth')
 Route.put('/users', 'UserController.update').middleware('auth')
 
 // Session routes
